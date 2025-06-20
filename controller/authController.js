@@ -62,7 +62,7 @@ export const login = async (req, res) => {
       sameSite: "Strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    return res.status(201).json({ message: "Login success!" });
+    return res.status(201).json(user);
   } catch (error) {
     console.log("login error");
     return res.status(500).json({ message: `Login Error${error}` });
@@ -76,5 +76,26 @@ export const logout = async (req, res) => {
   } catch (error) {
     console.log("logout error");
     return res.status(500).json({ message: `Logout Error${error}` });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      user = await User.create({ name, email });
+    }
+    let token = await generateToken(user._id);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "Strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return res.status(201).json(user);
+  } catch (error) {
+    console.log("googleLogin error ");
+    return res.status(500).json({ message: `googleLoginError${error}` });
   }
 };
